@@ -1,75 +1,46 @@
 """
-graph.py
+union_find.py
 
-Utility functions for graph and tree operations
-used in the DC-MST project.
+Disjoint Set Union (Union-Find) data structure.
+Used for cycle detection and connectivity checks.
 """
 
-from typing import List, Tuple, Dict, Set
-from collections import defaultdict, deque
+from typing import Set
 
 
-Edge = Tuple[int, int, float]
-Tree = List[Edge]
-
-
-def tree_cost(tree: Tree) -> float:
+class UnionFind:
     """
-    Computes the total weight of a tree.
+    Union-Find data structure with path compression.
     """
-    return sum(weight for _, _, weight in tree)
 
+    def __init__(self, vertices: Set[int]):
+        self.parent = {v: v for v in vertices}
+        self.rank = {v: 0 for v in vertices}
 
-def compute_degrees(tree: Tree) -> Dict[int, int]:
-    """
-    Computes the degree of each vertex in a tree.
-    """
-    degrees = defaultdict(int)
-    for u, v, _ in tree:
-        degrees[u] += 1
-        degrees[v] += 1
-    return degrees
+    def find(self, x: int) -> int:
+        """
+        Finds the representative of x with path compression.
+        """
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
 
+    def union(self, x: int, y: int) -> bool:
+        """
+        Unites the sets of x and y.
+        Returns False if x and y were already connected.
+        """
+        rx, ry = self.find(x), self.find(y)
 
-def respects_degree_constraints(tree: Tree,
-                                degree_bounds: Dict[int, int]) -> bool:
-    """
-    Checks whether a tree respects all degree constraints.
-    """
-    degrees = compute_degrees(tree)
-    for v, deg in degrees.items():
-        if deg > degree_bounds[v]:
+        if rx == ry:
             return False
-    return True
 
+        if self.rank[rx] < self.rank[ry]:
+            self.parent[rx] = ry
+        elif self.rank[rx] > self.rank[ry]:
+            self.parent[ry] = rx
+        else:
+            self.parent[ry] = rx
+            self.rank[rx] += 1
 
-def build_adjacency(vertices: Set[int],
-                    edges: Tree) -> Dict[int, Set[int]]:
-    """
-    Builds adjacency list from edges.
-    """
-    adj = {v: set() for v in vertices}
-    for u, v, _ in edges:
-        adj[u].add(v)
-        adj[v].add(u)
-    return adj
-
-
-def is_connected(vertices: Set[int], edges: Tree) -> bool:
-    """
-    Checks whether the graph defined by edges is connected.
-    """
-    if not vertices:
         return True
-
-    adj = build_adjacency(vertices, edges)
-    visited = set()
-    queue = deque([next(iter(vertices))])
-
-    while queue:
-        current = queue.popleft()
-        if current not in visited:
-            visited.add(current)
-            queue.extend(adj[current] - visited)
-
-    return visited == vertices

@@ -13,7 +13,7 @@ from instances.generator import generate_feasible_instance
 from src.brute_force import brute_force_dc_mst
 from src.greedy import greedy_dc_mst
 from src.local_search import local_search_dc_mst
-from src.utils.graph import tree_cost
+from utils.graph import tree_cost
 
 
 def run_single_experiment(config: Dict) -> Dict:

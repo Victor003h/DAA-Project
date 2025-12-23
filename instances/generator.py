@@ -16,7 +16,7 @@ def generate_graph(num_vertices: int,
                    edge_probability: float,
                    weight_range: Tuple[int, int],
                    degree_bound: int,
-                   seed: int = None):
+                   **seed: int ):
     """
     Generates a random undirected weighted graph
     with uniform degree constraints.
@@ -41,7 +41,7 @@ def generate_graph(num_vertices: int,
     degree_bounds : dict
     """
     if seed is not None:
-        random.seed(seed)
+        random.seed(**seed)
 
     vertices: Set[int] = set(range(num_vertices))
     edges: List[Edge] = []
@@ -62,7 +62,7 @@ def generate_feasible_instance(num_vertices: int,
                                weight_range: Tuple[int, int],
                                degree_bound: int,
                                max_attempts: int = 100,
-                               seed: int = None):
+                               **seed: int):
     """
     Generates an instance that is likely to admit
     at least one feasible spanning tree.
@@ -79,7 +79,7 @@ def generate_feasible_instance(num_vertices: int,
             edge_probability,
             weight_range,
             degree_bound,
-            seed
+            **seed
         )
 
         # A necessary (but not sufficient) condition:
