@@ -1,0 +1,502 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\geometry{margin=2.5cm}
+\onehalfspacing
+
+\title{Conectando la Universidad de La Habana:\\
+Diseño y Análisis de una Red de Fibra Óptica con Restricciones de Grado}
+\author{Nombre del Estudiante}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introducción}
+
+La modernización de la infraestructura de red es un componente esencial para el desarrollo académico y científico de las universidades modernas. En este contexto, la Universidad de La Habana (UH), con el apoyo técnico de ETECSA, se propone interconectar sus edificios principales mediante una red de fibra óptica de alta velocidad.
+
+El presente trabajo aborda este problema desde una perspectiva de \textbf{Diseño y Análisis de Algoritmos}, modelándolo como un problema de optimización combinatoria sobre grafos, sujeto a restricciones técnicas reales. El objetivo es diseñar una red de costo mínimo que conecte todos los edificios sin ciclos innecesarios y respetando la capacidad limitada de los equipos de red instalados en cada edificio.
+
+\section{Descripción Informal del Problema}
+
+Se dispone de un conjunto de edificios que deben ser interconectados mediante enlaces de fibra óptica. Cada posible enlace tiene un costo asociado y cada edificio cuenta con un equipo de red con un número máximo de puertos, lo que limita la cantidad de conexiones directas que puede soportar.
+
+El objetivo es seleccionar un conjunto de enlaces que:
+\begin{itemize}
+    \item Conecte todos los edificios.
+    \item No contenga ciclos.
+    \item Respete las restricciones de grado impuestas por los equipos de red.
+    \item Minimice el costo total de instalación.
+\end{itemize}
+
+\section{Formalización Matemática}
+
+\subsection{Modelo de Grafo}
+
+El problema se modela como un grafo no dirigido y ponderado:
+\[
+G = (V, E, w)
+\]
+donde:
+\begin{itemize}
+    \item $V$ es el conjunto de vértices que representan los edificios.
+    \item $E$ es el conjunto de aristas que representan las posibles conexiones.
+    \item $w: E \rightarrow \mathbb{R}^+$ es una función de costos.
+\end{itemize}
+
+A cada vértice $v \in V$ se le asocia una cota de grado:
+\[
+b(v) \in \mathbb{N}
+\]
+
+\subsection{Definición del Problema}
+
+Encontrar un subconjunto de aristas $T \subseteq E$ tal que:
+\begin{enumerate}
+    \item $(V,T)$ sea un árbol generador.
+    \item $\deg_T(v) \leq b(v)$ para todo $v \in V$.
+    \item Se minimice $\sum_{e \in T} w(e)$.
+\end{enumerate}
+
+Este problema se conoce como \textbf{Degree-Constrained Minimum Spanning Tree (DC-MST)}.
+
+\section{Análisis de Complejidad Computacional}
+
+En esta sección se estudia rigurosamente la complejidad computacional del problema DC-MST, con el objetivo de fundamentar teóricamente las decisiones algorítmicas adoptadas en el resto del trabajo.
+
+\subsection{Marco teórico}
+
+En esta sección se analiza rigurosamente la complejidad computacional del problema
+\textit{Degree-Constrained Minimum Spanning Tree} (DC-MST). El objetivo es justificar,
+desde la teoría de la complejidad computacional, por qué no es razonable esperar
+algoritmos exactos eficientes para su resolución en el caso general y fundamentar
+el uso de heurísticas y métodos aproximados.
+\subsection{Pertenencia del DC-MST a NP}
+
+Un problema de decisión pertenece a la clase $\mathbf{P}$ si existe un algoritmo
+determinista que lo resuelve en tiempo polinomial con respecto al tamaño de la entrada.
+Un problema pertenece a la clase $\mathbf{NP}$ si, dada una solución candidata, esta
+puede verificarse en tiempo polinomial.
+
+Un problema es \textbf{NP-duro} si todo problema de $\mathbf{NP}$ puede reducirse a él
+mediante una transformación computable en tiempo polinomial. Si, además, el problema
+pertenece a $\mathbf{NP}$, se dice que es \textbf{NP-completo}.
+
+El problema clásico del Árbol Generador Mínimo (MST) pertenece a la clase $\mathbf{P}$.
+Sin embargo, como se mostrará a continuación, la introducción de restricciones sobre
+el grado máximo de los vértices altera radicalmente su complejidad computacional.
+\subsection{Problema canónico elegido: Hamiltonian Path}
+
+Para demostrar la NP-dureza del problema DC-MST se emplea una reducción polinomial
+desde el problema canónico \textbf{Hamiltonian Path (HP)}.
+
+\textbf{Definición (Hamiltonian Path).}  
+Dado un grafo no dirigido $G = (V,E)$, determinar si existe un camino simple que visite
+todos los vértices exactamente una vez.
+
+Este problema es conocido por ser \textbf{NP-completo}.
+
+La elección de Hamiltonian Path es natural por las siguientes razones estructurales:
+
+\begin{itemize}
+    \item Un camino es un grafo conexo y acíclico, es decir, un árbol.
+    \item En un camino, los vértices internos tienen grado exactamente 2.
+    \item Los vértices extremos del camino tienen grado exactamente 1.
+\end{itemize}
+
+Estas propiedades encajan directamente con la noción de árbol generador con
+restricciones de grado, particularmente cuando la cota de grado es igual a 2.
+
+\subsection{Construcción de la reducción}
+
+Sea $G = (V,E)$ una instancia arbitraria del problema Hamiltonian Path. A partir de
+ella se construye una instancia del problema DC-MST de la siguiente forma:
+
+\begin{itemize}
+    \item Se define $V' = V$.
+    \item Se define $E' = E$.
+    \item Para toda arista $e \in E'$, se asigna un peso unitario: $w(e) = 1$.
+    \item Se define la cota de grado para todos los vértices como:
+    \[
+        b(v) = 2 \quad \forall v \in V'.
+    \]
+\end{itemize}
+
+La instancia resultante está dada por el grafo ponderado
+$G' = (V',E',w)$ junto con la función de cotas de grado $b$.
+
+\subsection{Correctitud de la reducción}
+
+Se demuestra a continuación que la instancia construida de DC-MST tiene solución
+si y solo si la instancia original de Hamiltonian Path también la tiene.
+
+
+Implicación directa $(\Rightarrow)$ 
+
+
+Supóngase que existe un camino hamiltoniano en el grafo original $G$. Por definición,
+dicho camino:
+
+\begin{itemize}
+    \item Visita todos los vértices exactamente una vez.
+    \item Es conexo y no contiene ciclos.
+    \item Contiene exactamente $|V|-1$ aristas.
+\end{itemize}
+
+Además, en un camino hamiltoniano cada vértice tiene grado a lo sumo 2. Por tanto,
+este camino constituye un árbol generador válido para la instancia de DC-MST,
+respeta las restricciones de grado impuestas y su costo total es:
+
+\[
+(|V|-1) \cdot 1 = |V|-1.
+\]
+
+En consecuencia, existe una solución válida para la instancia de DC-MST
+
+---
+
+Implicación inversa $(\Leftarrow)$
+
+Supóngase ahora que existe una solución válida para la instancia de DC-MST construida.
+Dicha solución es un árbol generador $T$ que conecta todos los vértices y satisface:
+
+\[
+\deg_T(v) \leq 2 \quad \forall v \in V'.
+\]
+
+Un árbol en el que todos los vértices tienen grado a lo sumo 2 solo puede tener
+estructura de camino. La aciclicidad impide configuraciones alternativas y la
+restricción de grado excluye cualquier ramificación. Por tanto, el árbol $T$ define
+un camino simple que visita todos los vértices exactamente una vez.
+
+En consecuencia, existe un camino hamiltoniano en el grafo original $G$.
+
+\subsection{Complejidad de la transformación}
+
+
+La transformación descrita no añade vértices ni aristas al grafo original. La
+asignación de pesos y cotas de grado se realiza recorriendo los conjuntos $V$ y $E$,
+por lo que su complejidad temporal es:
+
+\[
+O(|V| + |E|).
+\]
+
+Por tanto, la reducción es computable en tiempo polinomial.
+
+\subsection{Conclusión}
+
+Dado que Hamiltonian Path es un problema NP-completo y que existe una reducción
+polinomial $HP \leq_p DC\text{-}MST$, se concluye que el problema DC-MST es
+\textbf{NP-duro}. Este resultado fundamenta teóricamente el enfoque adoptado en el
+resto del trabajo, basado en el uso de heurísticas y métodos aproximados.
+
+
+\section{Diseño de Algoritmos}
+
+En esta sección se presentan los algoritmos diseñados para resolver el problema
+\textit{Degree-Constrained Minimum Spanning Tree} (DC-MST). Dado que en la Sección 4
+se demostró que el problema es NP-duro, no es razonable esperar la existencia de
+algoritmos exactos eficientes para el caso general. Por ello, se adopta un enfoque
+escalonado que combina métodos exactos, heurísticos y de mejora iterativa.
+
+Este enfoque es coherente con los principios del Diseño y Análisis de Algoritmos
+para problemas de optimización combinatoria complejos.
+
+\subsection{Consideraciones generales de diseño}
+
+El problema DC-MST generaliza el problema clásico del Árbol Generador Mínimo (MST)
+mediante la introducción de restricciones de grado en los vértices. Mientras que
+el MST puede resolverse en tiempo polinomial, la restricción adicional impide el uso
+directo de algoritmos clásicos como Kruskal o Prim.
+
+Dado este contexto, el diseño algorítmico sigue tres objetivos fundamentales:
+
+\begin{itemize}
+    \item Garantizar soluciones óptimas en instancias pequeñas (algoritmo exacto).
+    \item Obtener soluciones factibles de manera eficiente (heurística voraz).
+    \item Mejorar la calidad de las soluciones sin explorar todo el espacio de búsqueda
+          (búsqueda local).
+\end{itemize}
+
+---
+
+\subsection{Algoritmo exacto por enumeración exhaustiva}
+
+\subsubsection{Idea general}
+
+El algoritmo exacto explora exhaustivamente el espacio de soluciones posibles,
+enumerando todos los árboles generadores del grafo y seleccionando aquel que cumpla
+las restricciones de grado y tenga el menor costo total. Este enfoque garantiza la
+optimalidad global de la solución obtenida.
+
+\subsubsection{Fundamento teórico}
+
+Un árbol generador sobre un conjunto de $n$ vértices contiene exactamente $n-1$
+aristas. El número de árboles generadores posibles en un grafo puede crecer de forma
+exponencial con respecto a $n$, lo que implica que este enfoque no es viable para
+instancias grandes. No obstante, resulta útil como referencia teórica y para validar
+heurísticas.
+
+\subsubsection{Pseudocódigo}
+
+\begin{algorithm}
+\caption{DC-MST Exacto por Fuerza Bruta}
+\begin{algorithmic}[1]
+\Require Grafo $G=(V,E,w)$, cotas de grado $b(v)$
+\Ensure Árbol generador óptimo $T^*$
+\State $T^* \gets \emptyset$
+\State $costo\_min \gets +\infty$
+\ForAll{árboles generadores $T \subseteq E$}
+    \If{$\forall v \in V: \deg_T(v) \leq b(v)$}
+        \State $costo \gets \sum_{e \in T} w(e)$
+        \If{$costo < costo\_min$}
+            \State $costo\_min \gets costo$
+            \State $T^* \gets T$
+        \EndIf
+    \EndIf
+\EndFor
+\Return $T^*$
+\end{algorithmic}
+\end{algorithm}
+
+---
+
+\subsection{Heurística voraz con restricción de grado}
+
+\subsubsection{Motivación}
+
+El algoritmo de Kruskal resuelve eficientemente el problema MST seleccionando aristas
+de menor costo y evitando ciclos. Sin embargo, este algoritmo no considera límites en
+el grado de los vértices. La heurística propuesta adapta esta estrategia incorporando
+la verificación explícita de las restricciones de grado en cada paso.
+
+\subsubsection{Estrategia voraz}
+
+La heurística selecciona iterativamente la arista de menor peso disponible, siempre
+que su inclusión no genere un ciclo ni viole las cotas de grado. Aunque esta estrategia
+no garantiza optimalidad, suele producir soluciones de buena calidad en tiempos
+razonables.
+
+\subsubsection{Pseudocódigo}
+
+\begin{algorithm}
+\caption{Heurística Voraz para DC-MST}
+\begin{algorithmic}[1]
+\Require Grafo $G=(V,E,w)$, cotas de grado $b(v)$
+\Ensure Árbol generador factible $T$
+\State Ordenar $E$ en orden creciente de $w$
+\State Inicializar estructura \textsc{Union-Find} sobre $V$
+\State $T \gets \emptyset$
+\State $\deg(v) \gets 0 \;\; \forall v \in V$
+\ForAll{$e=(u,v) \in E$ en orden creciente}
+    \If{$Find(u) \neq Find(v)$}
+        \If{$\deg(u) < b(u)$ \textbf{y} $\deg(v) < b(v)$}
+            \State $T \gets T \cup \{e\}$
+            \State $Union(u,v)$
+            \State $\deg(u) \gets \deg(u)+1$
+            \State $\deg(v) \gets \deg(v)+1$
+        \EndIf
+    \EndIf
+\EndFor
+\Return $T$
+\end{algorithmic}
+\end{algorithm}
+
+---
+
+\subsection{Mejora mediante búsqueda local}
+
+\subsubsection{Justificación}
+
+Las heurísticas voraces pueden quedar atrapadas en soluciones subóptimas debido a
+decisiones locales tempranas. La búsqueda local permite explorar el entorno de una
+solución factible, buscando mejoras incrementales sin necesidad de una exploración
+exhaustiva.
+
+\subsubsection{Definición del vecindario}
+
+El vecindario de una solución se define mediante intercambios de aristas
+(\textit{edge swaps}), en los que se elimina una arista del árbol actual y se añade
+otra externa, preservando la conectividad y las restricciones de grado.
+
+\subsubsection{Pseudocódigo}
+
+\begin{algorithm}
+\caption{Búsqueda Local para DC-MST}
+\begin{algorithmic}[1]
+\Require Solución inicial $T$, grafo $G=(V,E,w)$, cotas $b(v)$
+\Ensure Solución mejorada $T$
+\State $mejora \gets$ \textbf{true}
+\While{$mejora$}
+    \State $mejora \gets$ \textbf{false}
+    \ForAll{$e \in T$}
+        \ForAll{$e' \in E \setminus T$}
+            \State $T' \gets T - \{e\} + \{e'\}$
+            \If{$T'$ es árbol generador}
+                \If{$\forall v: \deg_{T'}(v) \leq b(v)$}
+                    \If{$costo(T') < costo(T)$}
+                        \State $T \gets T'$
+                        \State $mejora \gets$ \textbf{true}
+                        \State \textbf{break}
+                    \EndIf
+                \EndIf
+            \EndIf
+        \EndFor
+        \If{$mejora$}
+            \State \textbf{break}
+        \EndIf
+    \EndFor
+\EndWhile
+\Return $T$
+\end{algorithmic}
+\end{algorithm}
+
+---
+
+\subsection{Síntesis del enfoque algorítmico}
+
+
+El diseño algorítmico propuesto combina exactitud, eficiencia y calidad de solución.
+El algoritmo exacto proporciona una referencia teórica, la heurística voraz garantiza
+escalabilidad y la búsqueda local mejora la calidad de las soluciones obtenidas,
+logrando un equilibrio adecuado entre rigor teórico y aplicabilidad práctica.
+
+\section{Análisis Experimental}
+
+En esta sección se presenta el estudio experimental realizado sobre los algoritmos
+diseñados para el problema \textit{Degree-Constrained Minimum Spanning Tree} (DC-MST).
+El objetivo principal es evaluar empíricamente el comportamiento de los algoritmos,
+contrastando los resultados prácticos con las conclusiones teóricas obtenidas en las
+secciones anteriores.
+
+Dado que el problema es NP-duro, el análisis experimental resulta fundamental para
+comprender el compromiso entre optimalidad, eficiencia y escalabilidad de las
+soluciones propuestas.
+
+---
+
+\subsection{Metodología Experimental}
+
+Los experimentos se realizaron sobre instancias generadas aleatoriamente mediante
+un generador parametrizable. Cada instancia se define por los siguientes parámetros:
+
+\begin{itemize}
+    \item Número de vértices $|V|$.
+    \item Probabilidad de existencia de arista (modelo de Erdős--Rényi).
+    \item Rango de pesos de las aristas.
+    \item Cota máxima de grado uniforme $b(v)$.
+\end{itemize}
+
+Para cada configuración experimental se ejecutaron los siguientes algoritmos:
+
+\begin{itemize}
+    \item Algoritmo exacto por fuerza bruta (solo para instancias pequeñas).
+    \item Heurística voraz con restricción de grado.
+    \item Búsqueda local aplicada sobre la solución voraz.
+\end{itemize}
+
+Cada ejecución mide el tiempo de cómputo y el costo total de la solución obtenida.
+Los resultados se almacenaron en archivos CSV con el objetivo de facilitar su
+posterior análisis y reproducibilidad.
+
+---
+
+\subsection{Métricas de Evaluación}
+
+Las métricas empleadas en el análisis experimental son las siguientes:
+
+\begin{itemize}
+    \item \textbf{Costo total}: suma de los pesos de las aristas del árbol generado.
+    \item \textbf{Tiempo de ejecución}: tiempo de cómputo medido en segundos.
+    \item \textbf{Ratio de aproximación}: cociente entre el costo de una solución
+          heurística y el costo óptimo, cuando este último está disponible.
+\end{itemize}
+
+Estas métricas permiten evaluar tanto la calidad de las soluciones como la eficiencia
+computacional de cada enfoque.
+
+---
+
+\subsection{Resultados Experimentales}
+
+Los resultados obtenidos confirman las predicciones teóricas realizadas en el análisis
+de complejidad:
+
+\begin{itemize}
+    \item El algoritmo exacto presenta un crecimiento exponencial del tiempo de
+          ejecución, lo que restringe su uso a instancias con pocos vértices.
+    \item La heurística voraz escala eficientemente incluso para instancias más
+          grandes, produciendo soluciones factibles en tiempos muy reducidos.
+    \item La búsqueda local mejora sistemáticamente el costo de la solución voraz,
+          acercándose al óptimo cuando este es computable.
+\end{itemize}
+
+En instancias donde fue posible calcular la solución óptima, se observó que el ratio
+de aproximación de la heurística voraz es aceptable, y que la búsqueda local reduce
+significativamente dicha brecha.
+
+---
+
+\subsection{Discusión}
+
+El análisis experimental pone de manifiesto el clásico compromiso entre optimalidad y
+eficiencia en problemas NP-duros. Mientras que el algoritmo exacto garantiza la mejor
+solución posible, su costo computacional lo hace impracticable en escenarios reales.
+
+Por otro lado, las heurísticas permiten obtener soluciones de alta calidad en tiempos
+razonables, lo que las convierte en herramientas adecuadas para aplicaciones prácticas.
+La búsqueda local demuestra ser una estrategia efectiva para refinar soluciones
+iniciales sin incurrir en una exploración exhaustiva del espacio de búsqueda.
+
+Estos resultados validan empíricamente la estrategia algorítmica adoptada en este
+trabajo.
+
+---
+
+\subsection{Amenazas a la Validez}
+
+Como en todo estudio experimental, existen limitaciones que deben ser consideradas:
+
+\begin{itemize}
+    \item El uso de instancias aleatorias puede no reflejar todos los escenarios
+          reales posibles.
+    \item Las restricciones de grado se consideraron uniformes, lo que simplifica
+          ciertos casos prácticos.
+    \item El análisis se basa en un número finito de instancias y parámetros.
+\end{itemize}
+
+A pesar de estas limitaciones, el diseño experimental es suficiente para extraer
+conclusiones válidas sobre el comportamiento relativo de los algoritmos evaluados.
+
+---
+
+\subsection{Conclusión Experimental}
+
+Los experimentos realizados confirman que el problema DC-MST presenta un alto nivel
+de complejidad computacional, coherente con su clasificación como NP-duro. Al mismo
+tiempo, demuestran que la combinación de heurísticas voraces y búsqueda local permite
+obtener soluciones eficientes y de buena calidad en la práctica.
+
+Estos resultados respaldan el enfoque adoptado y justifican el uso de técnicas
+aproximadas para la resolución de problemas complejos de diseño de redes bajo
+restricciones reales.
+
+
+
+\section{Conclusiones}
+
+El trabajo evidencia la brecha entre optimalidad teórica y eficiencia práctica, y muestra la utilidad de las heurísticas para problemas NP-completos de relevancia real.
+
+\end{document}
