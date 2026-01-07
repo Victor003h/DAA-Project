@@ -9,30 +9,11 @@ extended with explicit degree constraints.
 """
 
 from typing import List, Tuple, Dict, Set
-
+from src.utils.union_find import UnionFind
 
 Edge = Tuple[int, int, float]   # (u, v, weight)
 Tree = List[Edge]
 
-
-class UnionFind:
-    """
-    Union-Find (Disjoint Set Union) data structure
-    with path compression.
-    """
-
-    def __init__(self, vertices: Set[int]):
-        self.parent = {v: v for v in vertices}
-
-    def find(self, x: int) -> int:
-        if self.parent[x] != x:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
-
-    def union(self, x: int, y: int) -> None:
-        rx, ry = self.find(x), self.find(y)
-        if rx != ry:
-            self.parent[ry] = rx
 
 
 def greedy_dc_mst(vertices: Set[int],

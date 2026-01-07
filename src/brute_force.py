@@ -12,34 +12,17 @@ Intended for small instances only.
 
 import itertools
 from typing import List, Tuple, Dict, Set
-
-
+from src.utils.union_find import UnionFind
+from src.utils.graph import (
+    is_connected,
+    tree_cost,
+    respects_degree_constraints,
+    
+)
 Edge = Tuple[int, int, float]   # (u, v, weight)
 Tree = List[Edge]
 
 
-def is_connected(vertices: Set[int], edges: Tree) -> bool:
-    """
-    Checks if the graph defined by 'edges' is connected.
-    """
-    if not vertices:
-        return True
-
-    adjacency = {v: set() for v in vertices}
-    for u, v, _ in edges:
-        adjacency[u].add(v)
-        adjacency[v].add(u)
-
-    visited = set()
-    stack = [next(iter(vertices))]
-
-    while stack:
-        current = stack.pop()
-        if current not in visited:
-            visited.add(current)
-            stack.extend(adjacency[current] - visited)
-
-    return visited == vertices
 
 
 def has_cycle(vertices: Set[int], edges: Tree) -> bool:
@@ -47,48 +30,13 @@ def has_cycle(vertices: Set[int], edges: Tree) -> bool:
     Checks whether the given edges contain a cycle
     using Union-Find logic.
     """
-    parent = {v: v for v in vertices}
-
-    def find(x):
-        while parent[x] != x:
-            x = parent[x]
-        return x
-
-    def union(x, y):
-        rx, ry = find(x), find(y)
-        if rx == ry:
-            return False
-        parent[ry] = rx
-        return True
-
+    union_find = UnionFind(vertices)   
+        
     for u, v, _ in edges:
-        if not union(u, v):
+        if not union_find.union(u, v):
             return True
 
     return False
-
-
-def respects_degree_constraints(edges: Tree,
-                                degree_bounds: Dict[int, int]) -> bool:
-    """
-    Checks if degree constraints are respected.
-    """
-    degrees = {v: 0 for v in degree_bounds}
-
-    for u, v, _ in edges:
-        degrees[u] += 1
-        degrees[v] += 1
-        if degrees[u] > degree_bounds[u] or degrees[v] > degree_bounds[v]:
-            return False
-
-    return True
-
-
-def tree_cost(edges: Tree) -> float:
-    """
-    Computes the total cost of a tree.
-    """
-    return sum(weight for _, _, weight in edges)
 
 
 def brute_force_dc_mst(vertices: Set[int],

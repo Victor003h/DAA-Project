@@ -10,29 +10,14 @@ using edge-swap neighborhood exploration.
 
 from typing import List, Tuple, Dict, Set
 from collections import defaultdict, deque
-
+from src.utils.graph import (
+    tree_cost,
+    build_adjacency,
+    respects_degree_constraints
+    )
 
 Edge = Tuple[int, int, float]   # (u, v, weight)
 Tree = List[Edge]
-
-
-def tree_cost(tree: Tree) -> float:
-    """
-    Computes the total cost of a tree.
-    """
-    return sum(weight for _, _, weight in tree)
-
-
-def build_adjacency(vertices: Set[int], tree: Tree) -> Dict[int, Set[int]]:
-    """
-    Builds adjacency list for a tree.
-    """
-    adj = {v: set() for v in vertices}
-    for u, v, _ in tree:
-        adj[u].add(v)
-        adj[v].add(u)
-    return adj
-
 
 def connected_components_after_removal(vertices: Set[int],
                                        tree: Tree,
@@ -61,20 +46,6 @@ def connected_components_after_removal(vertices: Set[int],
             components.append(comp)
 
     return components
-
-
-def respects_degree_constraints(tree: Tree,
-                                degree_bounds: Dict[int, int]) -> bool:
-    """
-    Checks if degree constraints are respected.
-    """
-    degree = defaultdict(int)
-    for u, v, _ in tree:
-        degree[u] += 1
-        degree[v] += 1
-        if degree[u] > degree_bounds[u] or degree[v] > degree_bounds[v]:
-            return False
-    return True
 
 
 def local_search_dc_mst(vertices: Set[int],
