@@ -1,0 +1,329 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{\textbf{Connecting the University of Havana:}\\
+Design and Analysis of a Degree-Constrained Fiber Optic Network}
+\author{José Agustín Del Toro González}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+The modernization of network infrastructure is a fundamental requirement for the
+academic and scientific development of modern universities. In this context, the
+University of Havana, with technical support from ETECSA, aims to interconnect its main
+buildings through a high-speed fiber optic network.
+
+This work addresses the problem from the perspective of \textit{Design and Analysis of
+Algorithms}, modeling it as a combinatorial optimization problem on graphs subject to
+real-world technical constraints. The goal is to design a minimum-cost network that
+connects all buildings, avoids unnecessary cycles, and respects the limited number of
+ports available at each network device.
+
+\section{Informal Problem Description}
+
+A set of university buildings must be interconnected using fiber optic links. Each possible
+connection has an associated installation cost, and each building is equipped with a
+network device that supports only a limited number of direct connections.
+
+The objective is to select a subset of connections that:
+\begin{itemize}
+    \item Connects all buildings.
+    \item Contains no cycles.
+    \item Respects degree constraints at each building.
+    \item Minimizes the total installation cost.
+\end{itemize}
+
+\section{Mathematical Formalization}
+
+\subsection{Graph Model}
+
+The problem is modeled as an undirected weighted graph:
+\[
+G = (V, E, w)
+\]
+where:
+\begin{itemize}
+    \item $V$ represents the set of buildings.
+    \item $E$ represents the set of possible fiber connections.
+    \item $w: E \rightarrow \mathbb{R}^+$ assigns a cost to each connection.
+\end{itemize}
+
+Each vertex $v \in V$ is associated with a degree bound $b(v)$ representing the maximum
+number of allowed connections.
+
+\subsection{Problem Definition}
+
+Find a subset of edges $T \subseteq E$ such that:
+\begin{enumerate}
+    \item $(V,T)$ is a spanning tree.
+    \item $\deg_T(v) \leq b(v)$ for all $v \in V$.
+    \item The total cost $\sum_{e \in T} w(e)$ is minimized.
+\end{enumerate}
+
+This problem is known as the \textbf{Degree-Constrained Minimum Spanning Tree (DC-MST)}
+problem.
+\section{Computational Complexity Analysis}
+
+In this section, the computational complexity of the DC-MST problem is rigorously
+studied, with the aim of theoretically justifying the algorithmic decisions adopted
+throughout the remainder of this work.
+
+\subsection{Theoretical Framework}
+
+This section provides a rigorous analysis of the computational complexity of the
+\textit{Degree-Constrained Minimum Spanning Tree} (DC-MST) problem. The objective is
+to justify, from the standpoint of computational complexity theory, why it is not
+reasonable to expect efficient exact algorithms for its resolution in the general
+case, and to provide a theoretical foundation for the use of heuristics and
+approximation methods.
+
+\subsection{Membership of DC-MST in NP}
+
+A decision problem belongs to the class $\mathbf{P}$ if there exists a deterministic
+algorithm that solves it in polynomial time with respect to the input size. A problem
+belongs to the class $\mathbf{NP}$ if, given a candidate solution, it can be verified
+in polynomial time.
+
+A problem is said to be \textbf{NP-hard} if every problem in $\mathbf{NP}$ can be
+reduced to it through a transformation computable in polynomial time. If, in
+addition, the problem belongs to $\mathbf{NP}$, it is said to be
+\textbf{NP-complete}.
+
+The classical Minimum Spanning Tree (MST) problem belongs to the class $\mathbf{P}$.
+However, as shown below, the introduction of constraints on the maximum degree of
+vertices radically alters its computational complexity.
+
+\subsection{Canonical Problem Chosen: Hamiltonian Path}
+
+To prove the NP-hardness of the DC-MST problem, a polynomial-time reduction is employed
+from the canonical problem \textbf{Hamiltonian Path (HP)}.
+
+\textbf{Definition (Hamiltonian Path).}  
+Given an undirected graph $G = (V,E)$, determine whether there exists a simple path
+that visits all vertices exactly once.
+
+This problem is known to be \textbf{NP-complete}.
+
+The choice of Hamiltonian Path is natural for the following structural reasons:
+
+\begin{itemize}
+    \item A path is a connected and acyclic graph, that is, a tree.
+    \item In a path, internal vertices have degree exactly 2.
+    \item The endpoints of the path have degree exactly 1.
+\end{itemize}
+
+These properties directly match the notion of a spanning tree with degree
+constraints, particularly when the degree bound is equal to 2.
+
+\subsection{Construction of the Reduction}
+
+Let $G = (V,E)$ be an arbitrary instance of the Hamiltonian Path problem. From this
+instance, a corresponding instance of the DC-MST problem is constructed as follows:
+
+\begin{itemize}
+    \item Define $V' = V$.
+    \item Define $E' = E$.
+    \item For every edge $e \in E'$, assign a unit weight: $w(e) = 1$.
+    \item Define the degree bound for all vertices as:
+    \[
+        b(v) = 2 \quad \forall v \in V'.
+    \]
+\end{itemize}
+
+The resulting instance consists of the weighted graph
+$G' = (V',E',w)$ together with the degree bound function $b$.
+
+\subsection{Correctness of the Reduction}
+
+We now prove that the constructed instance of DC-MST has a solution if and only if
+the original instance of Hamiltonian Path has a solution.
+
+\paragraph{Forward implication $(\Rightarrow)$}
+
+Assume that a Hamiltonian path exists in the original graph $G$. By definition, such
+a path:
+
+\begin{itemize}
+    \item Visits all vertices exactly once.
+    \item Is connected and contains no cycles.
+    \item Contains exactly $|V|-1$ edges.
+\end{itemize}
+
+Moreover, in a Hamiltonian path each vertex has degree at most 2. Therefore, this
+path constitutes a valid spanning tree for the DC-MST instance, satisfies all imposed
+degree constraints, and its total cost is:
+
+\[
+(|V|-1) \cdot 1 = |V|-1.
+\]
+
+Consequently, a valid solution exists for the constructed DC-MST instance.
+
+\paragraph{Backward implication $(\Leftarrow)$}
+
+Now assume that a valid solution exists for the constructed DC-MST instance. Such a
+solution is a spanning tree $T$ that connects all vertices and satisfies:
+
+\[
+\deg_T(v) \leq 2 \quad \forall v \in V'.
+\]
+
+A tree in which all vertices have degree at most 2 can only have a path structure.
+Acyclicity prevents alternative configurations, and the degree constraint excludes
+any branching. Therefore, the tree $T$ defines a simple path that visits all vertices
+exactly once.
+
+Consequently, a Hamiltonian path exists in the original graph $G$.
+
+\subsection{Complexity of the Transformation}
+
+The described transformation does not add vertices or edges to the original graph.
+The assignment of weights and degree bounds is performed by traversing the sets $V$
+and $E$, and thus its time complexity is:
+
+\[
+O(|V| + |E|).
+\]
+
+Therefore, the reduction is computable in polynomial time.
+
+\subsection{Conclusion}
+
+Since Hamiltonian Path is an NP-complete problem and there exists a polynomial-time
+reduction $HP \leq_p DC\text{-}MST$, it follows that the DC-MST problem is
+\textbf{NP-hard}. This result provides the theoretical foundation for the approach
+adopted in the remainder of this work, which is based on the use of heuristics and
+approximation methods.
+
+\section{Algorithm Design}
+
+\subsection{Exact Algorithm (Brute Force)}
+
+The exact algorithm enumerates all possible spanning trees, checks degree constraints,
+and selects the minimum-cost feasible solution. Although optimal, its exponential
+complexity limits its applicability to very small instances.
+
+\subsection{Greedy Heuristic}
+
+A greedy heuristic inspired by Kruskal's algorithm is employed. Edges are processed in
+ascending order of cost and added whenever they do not create cycles or violate degree
+constraints.
+
+\subsection{Local Search Improvement}
+
+The greedy solution is refined using a local search procedure based on edge exchanges.
+This approach improves solution quality while maintaining feasibility.
+
+\subsection{Metaheuristics for the DC-MST Problem}
+
+Due to the NP-hardness of the problem, metaheuristics are introduced to enhance global
+exploration of the solution space. Two approaches are considered: Simulated Annealing
+and Tabu Search.
+
+\subsubsection{Simulated Annealing}
+
+Simulated Annealing allows controlled acceptance of worse solutions based on a
+temperature parameter, enabling escape from local optima during early stages of the
+search.
+
+\begin{algorithm}
+\caption{Simulated Annealing for DC-MST}
+\begin{algorithmic}[1]
+\Require Initial solution $T$, graph $G$, degree bounds $b(v)$
+\Ensure Best solution $T^*$
+\State $T^* \leftarrow T$
+\While{temperature $> T_{min}$}
+    \State Generate neighbor $T'$
+    \If{$T'$ feasible}
+        \If{$cost(T') < cost(T)$}
+            \State $T \leftarrow T'$
+        \Else
+            \State Accept $T'$ with probability $e^{-\Delta/T}$
+        \EndIf
+    \EndIf
+    \If{$cost(T) < cost(T^*)$}
+        \State $T^* \leftarrow T$
+    \EndIf
+    \State Decrease temperature
+\EndWhile
+\Return $T^*$
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Tabu Search}
+
+Tabu Search extends local search by incorporating memory structures that prevent cycling
+and promote exploration of new regions.
+
+\begin{algorithm}
+\caption{Tabu Search for DC-MST}
+\begin{algorithmic}[1]
+\Require Initial solution $T$, graph $G$, degree bounds $b(v)$
+\Ensure Best solution $T^*$
+\State $T^* \leftarrow T$
+\For{maximum iterations}
+    \State Generate feasible neighborhood
+    \State Select best non-tabu neighbor
+    \State Update tabu list
+    \If{$cost(T) < cost(T^*)$}
+        \State $T^* \leftarrow T$
+    \EndIf
+\EndFor
+\Return $T^*$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Implementation}
+
+All algorithms were implemented in Python using efficient data structures for cycle
+detection and degree tracking. A random instance generator was developed to ensure
+reproducibility.
+
+\section{Experimental Analysis}
+
+\subsection{Methodology}
+
+Experiments were conducted on randomly generated instances with varying numbers of
+vertices, graph densities, and degree bounds. All algorithms were evaluated under the
+same conditions.
+
+\subsection{Metrics}
+
+\begin{itemize}
+    \item Total solution cost.
+    \item Execution time.
+    \item Approximation ratio (when optimal solution is available).
+\end{itemize}
+
+\subsection{Results and Discussion}
+
+The results confirm the exponential growth of the exact algorithm and the scalability of
+heuristic and metaheuristic approaches. Simulated Annealing and Tabu Search consistently
+produced lower-cost solutions than classical heuristics at the expense of increased, but
+manageable, execution time.
+
+\section{Conclusions}
+
+This work demonstrates the gap between theoretical optimality and practical efficiency in
+NP-hard problems. By combining classical algorithm design with metaheuristics, it is
+possible to obtain high-quality solutions suitable for real-world network design scenarios.
+
+\section{Future Work}
+
+Future extensions include the use of advanced metaheuristics, approximation algorithms
+with theoretical guarantees, and hybrid approaches incorporating machine learning to
+guide heuristic decisions.
+
+\end{document}

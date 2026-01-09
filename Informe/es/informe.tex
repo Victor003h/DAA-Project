@@ -364,6 +364,92 @@ otra externa, preservando la conectividad y las restricciones de grado.
 \end{algorithm}
 
 ---
+\subsection{Metaheurísticas para el problema DC-MST}
+
+Dado que el problema Degree-Constrained Minimum Spanning Tree es NP-duro, incluso
+las heurísticas clásicas pueden quedar atrapadas en óptimos locales cuando se enfrentan
+a instancias de mayor tamaño o estructuras desfavorables del grafo. Por esta razón, se
+considera la incorporación de metaheurísticas, las cuales permiten una exploración más
+profunda y flexible del espacio de soluciones.
+
+Las metaheurísticas se caracterizan por introducir mecanismos de exploración global,
+como aceptación controlada de soluciones subóptimas o el uso de memoria, manteniendo
+siempre la factibilidad de las soluciones generadas. En este trabajo se implementaron dos
+metaheurísticas especialmente adecuadas para problemas de optimización combinatoria
+sobre grafos: Simulated Annealing y Tabu Search.
+
+\subsubsection{Simulated Annealing}
+
+Simulated Annealing es una metaheurística inspirada en el proceso físico de recocido
+térmico. Su principio fundamental consiste en permitir, con cierta probabilidad, la
+aceptación de soluciones de mayor costo, con el objetivo de escapar de óptimos locales
+en etapas tempranas de la búsqueda.
+
+El algoritmo mantiene una solución actual y genera soluciones vecinas mediante
+intercambios de aristas (edge swaps). Si la solución vecina mejora el costo, se acepta
+directamente. En caso contrario, se acepta con una probabilidad que depende del
+incremento de costo y de un parámetro denominado temperatura, el cual decrece
+gradualmente a lo largo de la ejecución.
+
+Esta estrategia permite una exploración amplia del espacio de soluciones al inicio,
+favoreciendo posteriormente la explotación local conforme disminuye la temperatura.
+
+\begin{algorithm}
+\caption{Simulated Annealing para DC-MST}
+\begin{algorithmic}[1]
+\Require Solución inicial $T$, grafo $G=(V,E,w)$, cotas $b(v)$
+\Ensure Solución mejor encontrada $T^*$
+\State $T^* \leftarrow T$
+\State Inicializar temperatura $T_{emp}$
+\While{$T_{emp} > T_{min}$}
+    \State Generar solución vecina $T'$
+    \If{$T'$ es factible}
+        \If{$costo(T') < costo(T)$}
+            \State $T \leftarrow T'$
+        \Else
+            \State Aceptar $T'$ con probabilidad $e^{-\Delta / T_{emp}}$
+        \EndIf
+    \EndIf
+    \If{$costo(T) < costo(T^*)$}
+        \State $T^* \leftarrow T$
+    \EndIf
+    \State Actualizar temperatura
+\EndWhile
+\Return $T^*$
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Tabu Search}
+
+Tabu Search es una metaheurística basada en búsqueda local que incorpora memoria
+explícita para evitar ciclos y exploraciones redundantes. A diferencia de la búsqueda local
+clásica, Tabu Search permite aceptar soluciones no mejorantes, siempre que el movimiento
+realizado no esté prohibido por la lista tabu.
+
+En el contexto del DC-MST, los movimientos consisten en intercambios de aristas.
+Cada movimiento reciente se almacena temporalmente en una lista tabu, impidiendo
+su reversión inmediata. Este mecanismo fuerza al algoritmo a explorar nuevas regiones
+del espacio de soluciones, mejorando su capacidad de exploración global.
+
+\begin{algorithm}
+\caption{Tabu Search para DC-MST}
+\begin{algorithmic}[1]
+\Require Solución inicial $T$, grafo $G=(V,E,w)$, cotas $b(v)$
+\Ensure Mejor solución encontrada $T^*$
+\State $T^* \leftarrow T$
+\State Inicializar lista tabu
+\For{iteraciones máximas}
+    \State Generar vecindario factible de $T$
+    \State Seleccionar mejor $T'$ no tabu
+    \State $T \leftarrow T'$
+    \State Actualizar lista tabu
+    \If{$costo(T) < costo(T^*)$}
+        \State $T^* \leftarrow T$
+    \EndIf
+\EndFor
+\Return $T^*$
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{Síntesis del enfoque algorítmico}
 
@@ -405,7 +491,10 @@ Para cada configuración experimental se ejecutaron los siguientes algoritmos:
     \item Algoritmo exacto por fuerza bruta (solo para instancias pequeñas).
     \item Heurística voraz con restricción de grado.
     \item Búsqueda local aplicada sobre la solución voraz.
+    \item Simulated Annealing,utilizando como solución inicial el resultado de la heurística voraz
+    \item Tabu Search,aplicada sobre la misma solución inicial, con una lista tabu de tamaño fijo
 \end{itemize}
+
 
 Cada ejecución mide el tiempo de cómputo y el costo total de la solución obtenida.
 Los resultados se almacenaron en archivos CSV con el objetivo de facilitar su
@@ -441,11 +530,19 @@ de complejidad:
           grandes, produciendo soluciones factibles en tiempos muy reducidos.
     \item La búsqueda local mejora sistemáticamente el costo de la solución voraz,
           acercándose al óptimo cuando este es computable.
+    \item Simulated Annealing logró escapar de óptimos locales generados por la búsqueda local clásica.
+    \item Tabu Search presentó una exploración más estable del espacio de soluciones gracias al uso de memoria.
 \end{itemize}
+
+
+
+
 
 En instancias donde fue posible calcular la solución óptima, se observó que el ratio
 de aproximación de la heurística voraz es aceptable, y que la búsqueda local reduce
-significativamente dicha brecha.
+significativamente dicha brecha.Las metaheurísticas introducidas mostraron un comportamiento superior en términos de calidad de solución.Ambos enfoques obtuvieron soluciones de menor costo que las heurísticas tradicionales,
+a costa de un mayor tiempo de ejecución, aunque este incremento se mantuvo dentro de
+límites razonables para instancias de tamaño medio.
 
 ---
 

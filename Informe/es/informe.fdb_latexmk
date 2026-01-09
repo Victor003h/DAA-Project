@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1766441300.8126 "/run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/Informe/informe.tex" "informe.pdf" "informe" 1766441302.6367 0
+["pdflatex"] 1767919920.87009 "/run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe/informe.tex" "informe.pdf" "informe" 1767919924.00126 0
   "/etc/texmf/web2c/texmf.cnf" 1765993615.34075 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/Informe/informe.tex" 1766441298.36517 19332 8cfc53ba624d552b6c224385fc03f4c0 ""
+  "/run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe/informe.tex" 1767919917.98374 23752 738c969d20c380090f37acae89a3c929 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx1200.tfm" 1136768653 3584 402da0b29eafbad07963b1224b222f18 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx1440.tfm" 1136768653 3584 13049b61b922a28b158a38aeff75ee9b ""
@@ -37,6 +37,7 @@
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb" 1248133631 32080 340ef9bf63678554ee606688e7b5339d ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb" 1248133631 30251 6afa5cb1d0204815a708a080681d4674 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb" 1248133631 36741 fa121aac0049305630cf160b86157ee4 ""
+  "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb" 1248133631 37166 8ab3487cbe3ab49ebce74c29ea2418db ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb" 1248133631 35469 70d41d2b9ea31d5d813066df7c99281c ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb" 1248133631 32722 d7379af29a190c3f453aba36302ff5a9 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb" 1248133631 32726 0a1aea6fcd6468ee2cf64d891f5c43c8 ""
@@ -118,9 +119,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1764426900 41603 27f93b3067076450172040dcd57ca8b3 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1765994196 5541477 2050e4c255ae485a4e72e9d9a40b4c21 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1765994410 3640230 72ef24d998d8653d54fbbc6009017c50 ""
-  "informe.aux" 1766441302.46532 5523 906611a67232ba7bc6ae40019f28a32a "pdflatex"
-  "informe.out" 1766441302.46932 6422 abfc1635222ff17186182282ac883f0c "pdflatex"
-  "informe.tex" 1766441298.36517 19332 8cfc53ba624d552b6c224385fc03f4c0 ""
+  "informe.aux" 1767919923.79959 6226 bf5dd835d44e849bf74e7a948ae1947f "pdflatex"
+  "informe.out" 1767919923.80359 6982 da2f5438039f5aad288595bf371ba6c1 "pdflatex"
+  "informe.tex" 1767919917.98374 23752 738c969d20c380090f37acae89a3c929 ""
   (generated)
   "informe.aux"
   "informe.log"
