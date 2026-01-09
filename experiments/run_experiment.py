@@ -7,14 +7,45 @@ Degree-Constrained Minimum Spanning Tree (DC-MST) problem.
 
 import time
 import csv
-from typing import List, Dict
+from typing import List, Dict,Tuple
 
 from instances.generator import generate_feasible_instance
 from src.brute_force import brute_force_dc_mst
 from src.greedy import greedy_dc_mst
 from src.local_search import local_search_dc_mst
 from src.utils.graph import tree_cost
+from src.utils.graph import total_cost
+from src.simulated_annealing import simulated_annealing
+from src.tabu_search import tabu_search
 
+ALGORITHMS = {
+    "BruteForce": brute_force_dc_mst,
+    "Greedy": greedy_dc_mst,
+    "LocalSearch": local_search_dc_mst,
+    "SimulatedAnnealing": simulated_annealing,
+    "TabuSearch": tabu_search
+}
+
+def density(num_vertices: int, num_edges: int) -> float:
+    """
+    Calculates the density of a graph.
+    """
+    if num_vertices <= 1:
+        return 0.0
+    max_edges = num_vertices * (num_vertices - 1) / 2
+    return num_edges / max_edges
+def separate_weights_edges(edges: List[Tuple[int, int, float]]):
+    """
+    Crafts a weight dictionary from edge list.
+    """
+    weights = {}
+    list_edges=[]
+    
+    for u, v, w in edges:
+        weights[(u, v)] = w
+        weights[(v, u)] = w
+        list_edges.append((u, v))  # Undirected graph
+    return weights,list_edges
 
 def run_single_experiment(config: Dict) -> Dict:
     """
@@ -27,54 +58,53 @@ def run_single_experiment(config: Dict) -> Dict:
         degree_bound=config["degree_bound"],
         seed=config["seed"]
     )
-
-    results = {
-        "num_vertices": config["num_vertices"],
-        "degree_bound": config["degree_bound"],
-        "edge_probability": config["edge_probability"]
+    weights,edges_raw=separate_weights_edges(edges)
+    density_value = density(len(vertices), len(edges))    
+    instance = {
+        "vertices": vertices,
+        "edges": edges_raw,
+        "weights": weights
     }
 
-    # --- Greedy ---
-    start = time.perf_counter()
-    greedy_tree = greedy_dc_mst(vertices, edges, degree_bounds)
-    greedy_time = time.perf_counter() - start
+    results = {}
 
-    results["greedy_cost"] = tree_cost(greedy_tree)
-    results["greedy_time"] = greedy_time
-
-    # --- Local Search ---
-    start = time.perf_counter()
-    local_tree = local_search_dc_mst(
-        vertices, edges, greedy_tree, degree_bounds
+    # Initial solution for heuristics and metaheuristics
+    initial_solution, _ = greedy_dc_mst(
+        vertices, edges, degree_bounds
     )
-    local_time = time.perf_counter() - start
 
-    results["local_cost"] = tree_cost(local_tree)
-    results["local_time"] = local_time
+    for name, algorithm in ALGORITHMS.items():
+        start = time.time()
 
-    # --- Brute Force (only for small instances) ---
-    if config["num_vertices"] <= config["max_exact_n"]:
-        start = time.perf_counter()
-        exact_tree = brute_force_dc_mst(vertices, edges, degree_bounds)
-        exact_time = time.perf_counter() - start
+        if name == "BruteForce":
+            solution, cost = algorithm(
+                vertices, edges, degree_bounds
+            )
 
-        results["exact_cost"] = tree_cost(exact_tree)
-        results["exact_time"] = exact_time
+        elif name in ["Greedy", "LocalSearch"]:
+            solution, cost = algorithm(
+                vertices, edges, degree_bounds
+            )
 
-        results["approx_ratio_greedy"] = (
-            results["greedy_cost"] / results["exact_cost"]
-        )
-        results["approx_ratio_local"] = (
-            results["local_cost"] / results["exact_cost"]
-        )
-    else:
-        results["exact_cost"] = None
-        results["exact_time"] = None
-        results["approx_ratio_greedy"] = None
-        results["approx_ratio_local"] = None
+        else:  # Metaheuristics
+            solution, cost = algorithm(
+                instance,
+                degree_bounds,
+                initial_solution
+            )
+
+        elapsed = time.time() - start
+
+        results= {
+            "Algorithm": name,
+            "Vertices": vertices,
+            "Density": density_value,
+            "DegreeBound": degree_bounds,
+            "Cost": cost,
+            "Time": elapsed
+        }
 
     return results
-
 
 def run_experiments(configs: List[Dict], output_file: str):
     """
@@ -100,7 +130,7 @@ if __name__ == "__main__":
             "num_vertices": 6,
             "edge_probability": 0.6,
             "weight_range": (1, 20),
-            "degree_bound": 2,
+            "degree_bounds": 2,
             "seed": 42,
             "max_exact_n": 8
         },

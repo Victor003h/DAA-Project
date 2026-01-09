@@ -16,7 +16,7 @@ from src.utils.union_find import UnionFind
 from src.utils.graph import (
     is_connected,
     tree_cost,
-    respects_degree_constraints,
+    respects_degree_constraints_v1,
     
 )
 Edge = Tuple[int, int, float]   # (u, v, weight)
@@ -72,7 +72,7 @@ def brute_force_dc_mst(vertices: Set[int],
         if not is_connected(vertices, candidate):
             continue
 
-        if not respects_degree_constraints(candidate, degree_bounds):
+        if not respects_degree_constraints_v1(candidate, degree_bounds):
             continue
 
         cost = tree_cost(candidate)

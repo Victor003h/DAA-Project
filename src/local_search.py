@@ -13,7 +13,7 @@ from collections import defaultdict, deque
 from src.utils.graph import (
     tree_cost,
     build_adjacency,
-    respects_degree_constraints
+    respects_degree_constraints_v1
     )
 
 Edge = Tuple[int, int, float]   # (u, v, weight)
@@ -97,7 +97,7 @@ def local_search_dc_mst(vertices: Set[int],
                     candidate_tree.remove(edge_in)
                     candidate_tree.append((u, v, weight))
 
-                    if not respects_degree_constraints(candidate_tree, degree_bounds):
+                    if not respects_degree_constraints_v1(candidate_tree, degree_bounds):
                         continue
 
                     candidate_cost = tree_cost(candidate_tree)
