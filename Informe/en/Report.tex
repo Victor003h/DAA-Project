@@ -1,14 +1,19 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[12pt,a4paper]{article}
 
+\usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath, amssymb}
-\usepackage{graphicx}
-\usepackage{algorithm}
-\usepackage{algorithmic}
-\usepackage{hyperref}
 \usepackage{geometry}
-\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\geometry{margin=2.5cm}
+\onehalfspacing
+
 
 \title{\textbf{Connecting the University of Havana:}\\
 Design and Analysis of a Degree-Constrained Fiber Optic Network}
@@ -209,54 +214,216 @@ approximation methods.
 
 \section{Algorithm Design}
 
-\subsection{Exact Algorithm (Brute Force)}
+This section presents the algorithms designed to solve the
+\textit{Degree-Constrained Minimum Spanning Tree} (DC-MST) problem. Since in
+Section 4 it was shown that the problem is NP-hard, it is not reasonable to
+expect the existence of efficient exact algorithms for the general case.
+Therefore, a layered approach is adopted, combining exact methods, heuristics,
+and iterative improvement techniques.
 
-The exact algorithm enumerates all possible spanning trees, checks degree constraints,
-and selects the minimum-cost feasible solution. Although optimal, its exponential
-complexity limits its applicability to very small instances.
+This approach is consistent with the principles of Design and Analysis of
+Algorithms for complex combinatorial optimization problems.
 
-\subsection{Greedy Heuristic}
+\subsection{General design considerations}
 
-A greedy heuristic inspired by Kruskal's algorithm is employed. Edges are processed in
-ascending order of cost and added whenever they do not create cycles or violate degree
-constraints.
+The DC-MST problem generalizes the classical Minimum Spanning Tree (MST)
+problem by introducing degree constraints on the vertices. While the MST can
+be solved in polynomial time, the additional restriction prevents the direct
+application of classical algorithms such as Kruskal’s or Prim’s.
 
-\subsection{Local Search Improvement}
+Within this context, the algorithmic design follows three fundamental goals:
 
-The greedy solution is refined using a local search procedure based on edge exchanges.
-This approach improves solution quality while maintaining feasibility.
+\begin{itemize}
+    \item Guarantee optimal solutions for small instances (exact algorithm).
+    \item Obtain feasible solutions efficiently (greedy heuristic).
+    \item Improve solution quality without exploring the entire search space
+          (local search).
+\end{itemize}
 
-\subsection{Metaheuristics for the DC-MST Problem}
+---
 
-Due to the NP-hardness of the problem, metaheuristics are introduced to enhance global
-exploration of the solution space. Two approaches are considered: Simulated Annealing
-and Tabu Search.
+\subsection{Exact algorithm by exhaustive enumeration}
+
+\subsubsection{General idea}
+
+The exact algorithm exhaustively explores the space of possible solutions by
+enumerating all spanning trees of the graph and selecting the one that satisfies
+the degree constraints and has the minimum total cost. This approach guarantees
+global optimality of the obtained solution.
+
+\subsubsection{Theoretical foundation}
+
+A spanning tree over a set of $n$ vertices contains exactly $n-1$ edges. The
+number of possible spanning trees in a graph can grow exponentially with
+respect to $n$, which implies that this approach is not viable for large
+instances. Nevertheless, it is useful as a theoretical reference and for
+validating heuristic methods.
+
+\subsubsection{Pseudocode}
+
+\begin{algorithm}
+\caption{Exact DC-MST by Brute Force}
+\begin{algorithmic}[1]
+\Require Graph $G=(V,E,w)$, degree bounds $b(v)$
+\Ensure Optimal spanning tree $T^*$
+\State $T^* \gets \emptyset$
+\State $min\_cost \gets +\infty$
+\ForAll{spanning trees $T \subseteq E$}
+    \If{$\forall v \in V: \deg_T(v) \leq b(v)$}
+        \State $cost \gets \sum_{e \in T} w(e)$
+        \If{$cost < min\_cost$}
+            \State $min\_cost \gets cost$
+            \State $T^* \gets T$
+        \EndIf
+    \EndIf
+\EndFor
+\Return $T^*$
+\end{algorithmic}
+\end{algorithm}
+
+---
+
+\subsection{Greedy heuristic with degree constraints}
+
+\subsubsection{Motivation}
+
+Kruskal’s algorithm efficiently solves the MST problem by selecting edges of
+minimum cost while avoiding cycles. However, this algorithm does not consider
+vertex degree limits. The proposed heuristic adapts this strategy by explicitly
+checking degree constraints at each step.
+
+\subsubsection{Greedy strategy}
+
+The heuristic iteratively selects the available edge with minimum weight,
+provided that its inclusion does not create a cycle and does not violate the
+degree bounds. Although this strategy does not guarantee optimality, it usually
+produces good-quality solutions in reasonable time.
+
+\subsubsection{Pseudocode}
+
+\begin{algorithm}
+\caption{Greedy Heuristic for DC-MST}
+\begin{algorithmic}[1]
+\Require Graph $G=(V,E,w)$, degree bounds $b(v)$
+\Ensure Feasible spanning tree $T$
+\State Sort $E$ in non-decreasing order of $w$
+\State Initialize \textsc{Union-Find} structure over $V$
+\State $T \gets \emptyset$
+\State $\deg(v) \gets 0 \;\; \forall v \in V$
+\ForAll{$e=(u,v) \in E$ in increasing order}
+    \If{$Find(u) \neq Find(v)$}
+        \If{$\deg(u) < b(u)$ \textbf{and} $\deg(v) < b(v)$}
+            \State $T \gets T \cup \{e\}$
+            \State $Union(u,v)$
+            \State $\deg(u) \gets \deg(u)+1$
+            \State $\deg(v) \gets \deg(v)+1$
+        \EndIf
+    \EndIf
+\EndFor
+\Return $T$
+\end{algorithmic}
+\end{algorithm}
+
+---
+
+\subsection{Improvement through local search}
+
+\subsubsection{Justification}
+
+Greedy heuristics may become trapped in suboptimal solutions due to early local
+decisions. Local search allows exploration of the neighborhood of a feasible
+solution, seeking incremental improvements without requiring exhaustive search.
+
+\subsubsection{Neighborhood definition}
+
+The neighborhood of a solution is defined through edge swaps, in which one edge
+is removed from the current tree and another external edge is added, preserving
+connectivity and degree constraints.
+
+\subsubsection{Pseudocode}
+
+\begin{algorithm}
+\caption{Local Search for DC-MST}
+\begin{algorithmic}[1]
+\Require Initial solution $T$, graph $G=(V,E,w)$, bounds $b(v)$
+\Ensure Improved solution $T$
+\State $improved \gets$ \textbf{true}
+\While{$improved$}
+    \State $improved \gets$ \textbf{false}
+    \ForAll{$e \in T$}
+        \ForAll{$e' \in E \setminus T$}
+            \State $T' \gets T - \{e\} + \{e'\}$
+            \If{$T'$ is a spanning tree}
+                \If{$\forall v: \deg_{T'}(v) \leq b(v)$}
+                    \If{$cost(T') < cost(T)$}
+                        \State $T \gets T'$
+                        \State $improved \gets$ \textbf{true}
+                        \State \textbf{break}
+                    \EndIf
+                \EndIf
+            \EndIf
+        \EndFor
+        \If{$improved$}
+            \State \textbf{break}
+        \EndIf
+    \EndFor
+\EndWhile
+\Return $T$
+\end{algorithmic}
+\end{algorithm}
+
+---
+
+\subsection{Metaheuristics for the DC-MST problem}
+
+Since the Degree-Constrained Minimum Spanning Tree problem is NP-hard, even
+classical heuristics may become trapped in local optima when facing larger
+instances or unfavorable graph structures. For this reason, the incorporation
+of metaheuristics is considered, as they allow deeper and more flexible
+exploration of the solution space.
+
+Metaheuristics are characterized by introducing global exploration mechanisms,
+such as controlled acceptance of worse solutions or the use of memory, while
+always maintaining feasibility of the generated solutions. In this work, two
+metaheuristics particularly suitable for combinatorial optimization problems on
+graphs are implemented: Simulated Annealing and Tabu Search.
 
 \subsubsection{Simulated Annealing}
 
-Simulated Annealing allows controlled acceptance of worse solutions based on a
-temperature parameter, enabling escape from local optima during early stages of the
-search.
+Simulated Annealing is a metaheuristic inspired by the physical process of
+thermal annealing. Its fundamental principle is to allow, with a certain
+probability, the acceptance of higher-cost solutions in order to escape local
+optima during the early stages of the search.
+
+The algorithm maintains a current solution and generates neighboring solutions
+through edge swaps. If the neighboring solution improves the cost, it is
+accepted directly. Otherwise, it is accepted with a probability that depends on
+the cost increase and on a parameter called temperature, which gradually
+decreases throughout the execution.
+
+This strategy enables broad exploration of the solution space at the beginning,
+favoring local exploitation as the temperature decreases.
 
 \begin{algorithm}
 \caption{Simulated Annealing for DC-MST}
 \begin{algorithmic}[1]
-\Require Initial solution $T$, graph $G$, degree bounds $b(v)$
-\Ensure Best solution $T^*$
+\Require Initial solution $T$, graph $G=(V,E,w)$, bounds $b(v)$
+\Ensure Best solution found $T^*$
 \State $T^* \leftarrow T$
-\While{temperature $> T_{min}$}
-    \State Generate neighbor $T'$
-    \If{$T'$ feasible}
+\State Initialize temperature $T_{emp}$
+\While{$T_{emp} > T_{min}$}
+    \State Generate neighboring solution $T'$
+    \If{$T'$ is feasible}
         \If{$cost(T') < cost(T)$}
             \State $T \leftarrow T'$
         \Else
-            \State Accept $T'$ with probability $e^{-\Delta/T}$
+            \State Accept $T'$ with probability $e^{-\Delta / T_{emp}}$
         \EndIf
     \EndIf
     \If{$cost(T) < cost(T^*)$}
         \State $T^* \leftarrow T$
     \EndIf
-    \State Decrease temperature
+    \State Update temperature
 \EndWhile
 \Return $T^*$
 \end{algorithmic}
@@ -264,18 +431,27 @@ search.
 
 \subsubsection{Tabu Search}
 
-Tabu Search extends local search by incorporating memory structures that prevent cycling
-and promote exploration of new regions.
+Tabu Search is a local-search-based metaheuristic that incorporates explicit
+memory to avoid cycles and redundant exploration. Unlike classical local search,
+Tabu Search allows the acceptance of non-improving solutions, provided that the
+performed move is not forbidden by the tabu list.
+
+In the context of DC-MST, moves consist of edge swaps. Each recent move is
+temporarily stored in a tabu list, preventing its immediate reversal. This
+mechanism forces the algorithm to explore new regions of the solution space,
+enhancing its global exploration capability.
 
 \begin{algorithm}
 \caption{Tabu Search for DC-MST}
 \begin{algorithmic}[1]
-\Require Initial solution $T$, graph $G$, degree bounds $b(v)$
-\Ensure Best solution $T^*$
+\Require Initial solution $T$, graph $G=(V,E,w)$, bounds $b(v)$
+\Ensure Best solution found $T^*$
 \State $T^* \leftarrow T$
+\State Initialize tabu list
 \For{maximum iterations}
-    \State Generate feasible neighborhood
-    \State Select best non-tabu neighbor
+    \State Generate feasible neighborhood of $T$
+    \State Select best non-tabu solution $T'$
+    \State $T \leftarrow T'$
     \State Update tabu list
     \If{$cost(T) < cost(T^*)$}
         \State $T^* \leftarrow T$
@@ -285,45 +461,144 @@ and promote exploration of new regions.
 \end{algorithmic}
 \end{algorithm}
 
-\section{Implementation}
+\subsection{Synthesis of the algorithmic approach}
 
-All algorithms were implemented in Python using efficient data structures for cycle
-detection and degree tracking. A random instance generator was developed to ensure
-reproducibility.
-
+The proposed algorithmic design combines exactness, efficiency, and solution
+quality. The exact algorithm provides a theoretical reference, the greedy
+heuristic ensures scalability, and local search improves solution quality,
+achieving an appropriate balance between theoretical rigor and practical
+applicability.
 \section{Experimental Analysis}
 
-\subsection{Methodology}
+This section presents the experimental study carried out on the algorithms
+designed for the \textit{Degree-Constrained Minimum Spanning Tree} (DC-MST) problem.
+The main objective is to empirically evaluate the behavior of the algorithms,
+contrasting the practical results with the theoretical conclusions obtained in
+previous sections.
 
-Experiments were conducted on randomly generated instances with varying numbers of
-vertices, graph densities, and degree bounds. All algorithms were evaluated under the
-same conditions.
+Since the problem is NP-hard, experimental analysis is essential to understand
+the trade-off between optimality, efficiency, and scalability of the proposed
+solutions.
 
-\subsection{Metrics}
+---
+
+\subsection{Experimental Methodology}
+
+The experiments were conducted on randomly generated instances using a
+parameterizable generator. Each instance is defined by the following parameters:
 
 \begin{itemize}
-    \item Total solution cost.
-    \item Execution time.
-    \item Approximation ratio (when optimal solution is available).
+    \item Number of vertices $|V|$.
+    \item Edge existence probability (Erdős--Rényi model).
+    \item Edge weight range.
+    \item Uniform maximum degree bound $b(v)$.
 \end{itemize}
 
-\subsection{Results and Discussion}
+For each experimental configuration, the following algorithms were executed:
 
-The results confirm the exponential growth of the exact algorithm and the scalability of
-heuristic and metaheuristic approaches. Simulated Annealing and Tabu Search consistently
-produced lower-cost solutions than classical heuristics at the expense of increased, but
-manageable, execution time.
+\begin{itemize}
+    \item Exact brute-force algorithm (only for small instances).
+    \item Greedy heuristic with degree constraints.
+    \item Local search applied to the greedy solution.
+    \item Simulated Annealing, using the greedy heuristic solution as the initial solution.
+    \item Tabu Search, applied to the same initial solution, with a fixed-size tabu list.
+\end{itemize}
 
-\section{Conclusions}
+Each execution measures the computation time and the total cost of the obtained
+solution. The results were stored in CSV files to facilitate subsequent analysis
+and reproducibility.
 
-This work demonstrates the gap between theoretical optimality and practical efficiency in
-NP-hard problems. By combining classical algorithm design with metaheuristics, it is
-possible to obtain high-quality solutions suitable for real-world network design scenarios.
+---
+
+\subsection{Evaluation Metrics}
+
+The metrics used in the experimental analysis are the following:
+
+\begin{itemize}
+    \item \textbf{Total cost}: sum of the weights of the edges in the generated tree.
+    \item \textbf{Execution time}: computation time measured in seconds.
+    \item \textbf{Approximation ratio}: ratio between the cost of a heuristic solution
+          and the optimal cost, when the latter is available.
+\end{itemize}
+
+These metrics allow evaluating both the quality of the solutions and the
+computational efficiency of each approach.
+
+---
+
+\subsection{Experimental Results}
+
+The obtained results confirm the theoretical predictions derived from the
+complexity analysis:
+
+\begin{itemize}
+    \item The exact algorithm exhibits exponential growth in execution time,
+          restricting its use to instances with a small number of vertices.
+    \item The greedy heuristic scales efficiently even for larger instances,
+          producing feasible solutions in very short times.
+    \item Local search systematically improves the cost of the greedy solution,
+          approaching the optimum when it is computable.
+    \item Simulated Annealing successfully escaped local optima generated by
+          classical local search.
+    \item Tabu Search provided a more stable exploration of the solution space
+          thanks to the use of memory.
+\end{itemize}
+
+In instances where it was possible to compute the optimal solution, it was observed
+that the approximation ratio of the greedy heuristic is acceptable, and that local
+search significantly reduces this gap. The introduced metaheuristics showed superior
+performance in terms of solution quality. Both approaches obtained lower-cost
+solutions than traditional heuristics, at the expense of higher execution times,
+although this increase remained within reasonable limits for medium-sized instances.
+
+---
+
+\subsection{Discussion}
+
+The experimental analysis highlights the classic trade-off between optimality and
+efficiency in NP-hard problems. While the exact algorithm guarantees the best
+possible solution, its computational cost makes it impractical for real-world
+scenarios.
+
+On the other hand, heuristics allow obtaining high-quality solutions in reasonable
+times, making them suitable tools for practical applications. Local search proves
+to be an effective strategy for refining initial solutions without incurring an
+exhaustive exploration of the search space.
+
+These results empirically validate the algorithmic strategy adopted in this work.
+
+---
+
+\subsection{Threats to Validity}
+
+As in any experimental study, certain limitations must be considered:
+
+\begin{itemize}
+    \item The use of random instances may not reflect all possible real-world
+          scenarios.
+    \item Degree constraints were considered uniform, which simplifies some
+          practical cases.
+    \item The analysis is based on a finite number of instances and parameter
+          configurations.
+\end{itemize}
+
+Despite these limitations, the experimental design is sufficient to draw valid
+conclusions regarding the relative behavior of the evaluated algorithms.
+
+---
+
+\subsection{Experimental Conclusion}
+
+The conducted experiments confirm that the DC-MST problem exhibits a high level of
+computational complexity, consistent with its classification as NP-hard. At the
+same time, they demonstrate that the combination of greedy heuristics and local
+search allows obtaining efficient and high-quality solutions in practice.
+
+These results support the adopted approach and justify the use of approximate
+techniques for solving complex network design problems under real-world
+constraints.
 
 \section{Future Work}
-
-Future extensions include the use of advanced metaheuristics, approximation algorithms
-with theoretical guarantees, and hybrid approaches incorporating machine learning to
-guide heuristic decisions.
+The work highlights the gap between theoretical optimality and practical efficiency, and demonstrates the usefulness of heuristics for NP-complete problems of real-world relevance.
 
 \end{document}

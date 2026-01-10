@@ -1,9 +1,9 @@
-PWD /run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe
+PWD /run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe/es
 INPUT /etc/texmf/web2c/texmf.cnf
 INPUT /usr/share/texmf/web2c/texmf.cnf
 INPUT /usr/share/texlive/texmf-dist/web2c/texmf.cnf
 INPUT /var/lib/texmf/web2c/pdftex/pdflatex.fmt
-INPUT /run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe/informe.tex
+INPUT /run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe/es/informe.tex
 OUTPUT informe.log
 INPUT /usr/share/texlive/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/share/texlive/texmf-dist/tex/latex/base/article.cls

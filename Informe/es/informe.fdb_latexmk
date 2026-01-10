@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1767919920.87009 "/run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe/informe.tex" "informe.pdf" "informe" 1767919924.00126 0
+["pdflatex"] 1768071011.7722 "/run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe/es/informe.tex" "informe.pdf" "informe" 1768071013.84337 0
   "/etc/texmf/web2c/texmf.cnf" 1765993615.34075 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe/informe.tex" 1767919917.98374 23752 738c969d20c380090f37acae89a3c929 ""
+  "/run/media/jotogo/01DC27E75878C270/Universidad/4to Año/DAA/Proyecto/DAA-Project/Informe/es/informe.tex" 1768071011.2002 23752 738c969d20c380090f37acae89a3c929 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx1200.tfm" 1136768653 3584 402da0b29eafbad07963b1224b222f18 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx1440.tfm" 1136768653 3584 13049b61b922a28b158a38aeff75ee9b ""
@@ -119,9 +119,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1764426900 41603 27f93b3067076450172040dcd57ca8b3 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1765994196 5541477 2050e4c255ae485a4e72e9d9a40b4c21 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1765994410 3640230 72ef24d998d8653d54fbbc6009017c50 ""
-  "informe.aux" 1767919923.79959 6226 bf5dd835d44e849bf74e7a948ae1947f "pdflatex"
-  "informe.out" 1767919923.80359 6982 da2f5438039f5aad288595bf371ba6c1 "pdflatex"
-  "informe.tex" 1767919917.98374 23752 738c969d20c380090f37acae89a3c929 ""
+  "informe.aux" 1768071013.6521 6226 bf5dd835d44e849bf74e7a948ae1947f "pdflatex"
+  "informe.out" 1768071013.6521 6982 da2f5438039f5aad288595bf371ba6c1 "pdflatex"
+  "informe.tex" 1768071011.2002 23752 738c969d20c380090f37acae89a3c929 ""
   (generated)
   "informe.aux"
   "informe.log"
