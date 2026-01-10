@@ -9,14 +9,15 @@ import random
 from typing import List, Tuple, Dict, Set
 
 
-Edge = Tuple[int, int, float]
+Edge = Tuple[int, int]
+Weight = Dict[Tuple[int, int], float]
 
 
 def generate_graph(num_vertices: int,
                    edge_probability: float,
                    weight_range: Tuple[int, int],
                    degree_bound: int,
-                   **seed: int ):
+                   seed: int ):
     """
     Generates a random undirected weighted graph
     with uniform degree constraints.
@@ -41,20 +42,22 @@ def generate_graph(num_vertices: int,
     degree_bounds : dict
     """
     if seed is not None:
-        random.seed(**seed)
+        random.seed(seed)
 
     vertices: Set[int] = set(range(num_vertices))
     edges: List[Edge] = []
+    weights: Weight = {}
 
     for i in range(num_vertices):
         for j in range(i + 1, num_vertices):
             if random.random() < edge_probability:
                 weight = random.randint(*weight_range)
-                edges.append((i, j, float(weight)))
+                edges.append((i, j))
+                weights[(i, j)] = weight
 
     degree_bounds: Dict[int, int] = {v: degree_bound for v in vertices}
 
-    return vertices, edges, degree_bounds
+    return vertices, edges, weights, degree_bounds
 
 
 def generate_feasible_instance(num_vertices: int,
@@ -74,7 +77,7 @@ def generate_feasible_instance(num_vertices: int,
     vertices, edges, degree_bounds
     """
     for _ in range(max_attempts):
-        vertices, edges, degree_bounds = generate_graph(
+        vertices, edges, weights, degree_bounds = generate_graph(
             num_vertices,
             edge_probability,
             weight_range,
@@ -84,6 +87,6 @@ def generate_feasible_instance(num_vertices: int,
 
         # A necessary (but not sufficient) condition:
         if len(edges) >= num_vertices - 1:
-            return vertices, edges, degree_bounds
+            return vertices, edges, weights, degree_bounds
 
     raise RuntimeError("Failed to generate a feasible instance.")

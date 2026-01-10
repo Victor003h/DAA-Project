@@ -2,9 +2,9 @@ import math
 import random
 from copy import deepcopy
 
-from utils.graph import (
+from src.utils.graph import (
 
-    respects_degree_constraints_v2,
+    respects_degree_constraints,
     total_cost,
     generate_neighbor
 )
@@ -49,7 +49,7 @@ def simulated_annealing(
             temperature *= cooling_rate
             continue
 
-        if not respects_degree_constraints_v2(neighbor, degree_bounds):
+        if not respects_degree_constraints(neighbor, degree_bounds):
             iteration += 1
             temperature *= cooling_rate
             continue

@@ -10,15 +10,13 @@ extended with explicit degree constraints.
 
 from typing import List, Tuple, Dict, Set
 from src.utils.union_find import UnionFind
-
-Edge = Tuple[int, int, float]   # (u, v, weight)
-Tree = List[Edge]
+from src.utils.graph import total_cost,Edge
 
 
 
-def greedy_dc_mst(vertices: Set[int],
-                  edges: List[Edge],
-                  degree_bounds: Dict[int, int]) -> Tree:
+
+
+def greedy_dc_mst(graph,degree_bounds: Dict[int, int]) -> Tuple[list[Edge], float]:
     """
     Greedy solver for DC-MST.
 
@@ -36,21 +34,23 @@ def greedy_dc_mst(vertices: Set[int],
     Tree
         Degree-constrained spanning tree (heuristic).
     """
-    sorted_edges = sorted(edges, key=lambda e: e[2])
+    vertices = graph["vertices"]
+    edges = graph["edges"]
+    sorted_edges = sorted(edges, key=lambda e: e[1])
     uf = UnionFind(vertices)
 
     degree = {v: 0 for v in vertices}
-    tree: Tree = []
+    tree: list[Edge] = []
 
-    for u, v, weight in sorted_edges:
+    for u, v in sorted_edges:
         if uf.find(u) != uf.find(v):
             if degree[u] < degree_bounds[u] and degree[v] < degree_bounds[v]:
-                tree.append((u, v, weight))
+                tree.append((u, v))
                 uf.union(u, v)
                 degree[u] += 1
                 degree[v] += 1
 
         if len(tree) == len(vertices) - 1:
             break
-
-    return tree
+    cost= total_cost(graph, tree)
+    return tree,cost

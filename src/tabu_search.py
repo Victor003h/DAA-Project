@@ -1,8 +1,8 @@
 from collections import deque
 from copy import deepcopy
 
-from utils.graph import (
-    respects_degree_constraints_v2,
+from src.utils.graph import (
+    respects_degree_constraints,
     total_cost,
     generate_neighbor_with_move
 )
@@ -36,7 +36,7 @@ def tabu_search(
             if move in tabu_list:
                 continue
 
-            if not respects_degree_constraints_v2(neighbor, degree_bounds):
+            if not respects_degree_constraints(neighbor, degree_bounds):
                 continue
 
             cost = total_cost(graph, neighbor)

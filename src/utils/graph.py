@@ -9,15 +9,9 @@ from typing import List, Tuple, Dict, Set
 from collections import defaultdict, deque
 import random
 
-Edge = Tuple[int, int, float]
-Tree = List[Edge]
+Edge = Tuple[int, int]
 
 
-def tree_cost(tree: Tree) -> float:
-    """
-    Computes the total weight of a tree.
-    """
-    return sum(weight for _, _, weight in tree)
 
 def total_cost(graph, tree_edges):
     """
@@ -30,29 +24,19 @@ def total_cost(graph, tree_edges):
 
 
 
-def compute_degrees(tree: Tree) -> Dict[int, int]:
+def compute_degrees(tree: list[Edge]) -> Dict[int, int]:
     """
     Computes the degree of each vertex in a tree.
     """
     degrees = defaultdict(int)
-    for u, v, _ in tree:
+    for u, v in tree:
         degrees[u] += 1
         degrees[v] += 1
     return degrees
 
 
-def respects_degree_constraints_v1(tree: Tree,
-                                degree_bounds: Dict[int, int]) -> bool:
-    """
-    Checks whether a tree respects all degree constraints.
-    """
-    degrees = compute_degrees(tree)
-    for v, deg in degrees.items():
-        if deg > degree_bounds[v]:
-            return False
-    return True
 
-def respects_degree_constraints_v2(tree_edges, degree_bounds):
+def respects_degree_constraints(tree_edges, degree_bounds):
     """
     Checks if all vertices respect their degree constraints.
     """
@@ -71,18 +55,18 @@ def respects_degree_constraints_v2(tree_edges, degree_bounds):
 
 
 def build_adjacency(vertices: Set[int],
-                    edges: Tree) -> Dict[int, Set[int]]:
+                    edges: list[Edge]) -> Dict[int, Set[int]]:
     """
     Builds adjacency list from edges.
     """
     adj = {v: set() for v in vertices}
-    for u, v, _ in edges:
+    for u, v in edges:
         adj[u].add(v)
         adj[v].add(u)
     return adj
 
 
-def is_connected(vertices: Set[int], edges: Tree) -> bool:
+def is_connected(vertices: Set[int], edges: list[Edge]) -> bool:
     """
     Checks whether the graph defined by edges is connected.
     """

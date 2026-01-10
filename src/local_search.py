@@ -11,21 +11,21 @@ using edge-swap neighborhood exploration.
 from typing import List, Tuple, Dict, Set
 from collections import defaultdict, deque
 from src.utils.graph import (
-    tree_cost,
+    
     build_adjacency,
-    respects_degree_constraints_v1
+    respects_degree_constraints,
+    total_cost,
+    Edge,
     )
 
-Edge = Tuple[int, int, float]   # (u, v, weight)
-Tree = List[Edge]
 
 def connected_components_after_removal(vertices: Set[int],
-                                       tree: Tree,
+                                       tree: list[Edge],
                                        removed_edge: Edge) -> List[Set[int]]:
     """
     Returns the connected components obtained after removing one edge.
     """
-    u, v, _ = removed_edge
+    u, v = removed_edge
     remaining_edges = [e for e in tree if e != removed_edge]
 
     adj = build_adjacency(vertices, remaining_edges)
@@ -48,10 +48,9 @@ def connected_components_after_removal(vertices: Set[int],
     return components
 
 
-def local_search_dc_mst(vertices: Set[int],
-                        edges: List[Edge],
-                        initial_tree: Tree,
-                        degree_bounds: Dict[int, int]) -> Tree:
+def local_search_dc_mst(graph,
+                        degree_bounds: Dict[int, int],
+                        initial_tree: list[Edge]) -> Tuple[list[Edge], float]:
     """
     Local search algorithm for DC-MST.
 
@@ -71,8 +70,11 @@ def local_search_dc_mst(vertices: Set[int],
     Tree
         Improved solution (local optimum).
     """
+    
+    vertices= graph['vertices']
+    edges= graph['edges']
     current_tree = initial_tree[:]
-    current_cost = tree_cost(current_tree)
+    current_cost = total_cost(graph, current_tree)
 
     improved = True
     while improved:
@@ -88,19 +90,19 @@ def local_search_dc_mst(vertices: Set[int],
 
             comp_a, comp_b = components
 
-            for u, v, weight in edges:
+            for u, v in edges:
                 if (u in comp_a and v in comp_b) or (u in comp_b and v in comp_a):
-                    if (u, v, weight) in current_tree or (v, u, weight) in current_tree:
+                    if (u, v) in current_tree or (v, u) in current_tree:
                         continue
 
                     candidate_tree = current_tree[:]
                     candidate_tree.remove(edge_in)
-                    candidate_tree.append((u, v, weight))
+                    candidate_tree.append((u, v))
 
-                    if not respects_degree_constraints_v1(candidate_tree, degree_bounds):
+                    if not respects_degree_constraints(candidate_tree, degree_bounds):
                         continue
 
-                    candidate_cost = tree_cost(candidate_tree)
+                    candidate_cost = total_cost(graph, candidate_tree)
 
                     if candidate_cost < current_cost:
                         current_tree = candidate_tree
@@ -114,4 +116,4 @@ def local_search_dc_mst(vertices: Set[int],
             if improved:
                 break
 
-    return current_tree
+    return current_tree,current_cost
